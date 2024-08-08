@@ -1,0 +1,14 @@
+{
+  "exports": "./mod.ts",
+  "fmt": {
+    "lineWidth": 120,
+    "semiColons": false
+  },
+  "name": "@ynotnauk/twitch",
+  "tasks": {},
+  "version": "0.0.1a",
+  "imports": {
+    "@std/fs": "jsr:@std/fs@^1.0.1",
+    "@std/path": "jsr:@std/path@^1.0.2"
+  }
+}
