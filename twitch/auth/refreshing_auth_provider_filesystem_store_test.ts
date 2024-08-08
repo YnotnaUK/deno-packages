@@ -20,9 +20,9 @@ Deno.test("Create a valid provider get and save tokens", async () => {
   const store = new RefreshingAuthProviderFilesystemStore({
     storePath,
   })
-  const userTokens = await store.getTokensByTwitchUserId(userId)
+  const userTokens = await store.getTokensByUserId(userId)
   if (!userTokens) {
     throw new Error(`No tokens returned`)
   }
-  await store.saveTokensByTwitchUserId(userId, userTokens)
+  await store.saveTokensByUserId(userId, userTokens)
 })

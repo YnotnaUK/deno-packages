@@ -16,13 +16,13 @@ export class RefreshingAuthProviderFilesystemStore implements RefreshingAuthProv
   private buildStorePath(userId: string): string {
     return `${this.storesPath}/tokens.${userId}.json`
   }
-  public async getTokensByTwitchUserId(userId: string): Promise<UserTokens | undefined> {
+  public async getTokensByUserId(userId: string): Promise<UserTokens | undefined> {
     const userStorePath: string = this.buildStorePath(userId)
     const fileContents = await Deno.readTextFile(userStorePath)
     const userTokens = JSON.parse(fileContents) as UserTokens
     return userTokens
   }
-  public async saveTokensByTwitchUserId(userId: string, userTokens: UserTokens): Promise<UserTokens> {
+  public async saveTokensByUserId(userId: string, userTokens: UserTokens): Promise<UserTokens> {
     const userStorePath: string = this.buildStorePath(userId)
     const fileContents = JSON.stringify(userTokens, undefined, 2)
     await Deno.writeTextFile(userStorePath, fileContents)
