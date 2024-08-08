@@ -1,11 +1,11 @@
 import { RefreshingAuthProviderFilesystemStore } from "../mod.ts"
 
 Deno.test("Create provider with invalid path", () => {
-  const storesPath: string = "./twitch/test/fake_store"
-  const expectedError = `storesPath does not exist: ${storesPath}`
+  const storePath: string = "./twitch/test/fake_store"
+  const expectedError = `storesPath does not exist: ${storePath}`
   try {
     new RefreshingAuthProviderFilesystemStore({
-      storesPath,
+      storePath,
     })
   } catch (error) {
     if (error.message !== expectedError) {
@@ -15,8 +15,11 @@ Deno.test("Create provider with invalid path", () => {
 })
 
 Deno.test("Create a valid provider get and save tokens", async () => {
+  const storePath: string = "./twitch/test/auth_store"
   const userId = "valid"
-  const store = new RefreshingAuthProviderFilesystemStore({ storesPath: "./twitch/test/auth_store" })
+  const store = new RefreshingAuthProviderFilesystemStore({
+    storePath,
+  })
   const userTokens = await store.getTokensByTwitchUserId(userId)
   if (!userTokens) {
     throw new Error(`No tokens returned`)

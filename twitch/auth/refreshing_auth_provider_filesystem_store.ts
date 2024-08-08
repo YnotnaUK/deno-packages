@@ -2,11 +2,12 @@ import { existsSync } from "jsr:@std/fs"
 
 import type { RefreshingAuthProviderStore } from "./refreshing_auth_provider_store.ts"
 import type { UserTokens } from "./user_tokens.ts"
+import type { RefreshingAuthProviderFilesystemStoreConfig } from "./refreshing_auth_provider_filesystem_store_config.ts"
 
 export class RefreshingAuthProviderFilesystemStore implements RefreshingAuthProviderStore {
   private readonly storesPath: string
-  constructor(config: { storesPath: string }) {
-    this.storesPath = config.storesPath
+  constructor(config: RefreshingAuthProviderFilesystemStoreConfig) {
+    this.storesPath = config.storePath
     // Ensure the stores path exists
     if (!existsSync(this.storesPath, { isReadable: true, isDirectory: true })) {
       throw new Error(`storesPath does not exist: ${this.storesPath}`)
