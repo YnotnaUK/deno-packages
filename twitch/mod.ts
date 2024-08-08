@@ -1,3 +1,6 @@
+export { Bot } from "./bot.ts"
+export type { BotConfig } from "./bot_config.ts"
+
 export type { AuthProvider } from "./auth/auth_provider.ts"
 export type { UserTokens } from "./auth/user_tokens.ts"
 
