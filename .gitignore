@@ -1,1 +1,8 @@
+# environment files
+.env
+
+# test coverage folder
 coverage
+
+# dont want to expose real tokens
+twitch/examples/default/data/tokens.*
