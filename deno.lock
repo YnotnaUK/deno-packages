@@ -2,10 +2,14 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/dotenv": "jsr:@std/dotenv@0.225.0",
       "jsr:@std/fs": "jsr:@std/fs@1.0.1",
       "jsr:@std/path@^1.0.2": "jsr:@std/path@1.0.2"
     },
     "jsr": {
+      "@std/dotenv@0.225.0": {
+        "integrity": "44db32932c67df82790a3e6847d7007befb6cc22d71f2f3ee7b7d00e1f0d6c94"
+      },
       "@std/fs@1.0.1": {
         "integrity": "d6914ca2c21abe591f733b31dbe6331e446815e513e2451b3b9e472daddfefcb",
         "dependencies": [
