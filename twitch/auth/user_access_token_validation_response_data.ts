@@ -1,4 +1,4 @@
-export interface UserTokenValidationResponse {
+export interface UserAccessTokenValidationResponseData {
   client_id: string
   login: string
   scopes: string[]
