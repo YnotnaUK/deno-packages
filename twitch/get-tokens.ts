@@ -21,9 +21,10 @@ const twitchScopes = [
   "whispers:edit",
   "whispers:read",
 ]
+const storePath: string = "./twitch/examples/default/data"
 
 const store = new RefreshingAuthProviderFilesystemStore({
-  storePath: "./twitch/examples/default/data",
+  storePath,
 })
 
 const authProvider = new RefreshingAuthProvider({
@@ -49,8 +50,12 @@ async function handler(request: Request): Promise<Response> {
         const userTokens = await authProvider.exchangeCodeForUserTokens(twitchCode)
         body = JSON.stringify({ userTokens }, undefined, 2)
         setTimeout(() => {
+          console.log(`Shutting down...`)
           Deno.exit()
         }, 10000)
+        console.log(
+          `Token flow completed and server will shutdown in 10 seconds, your tokens will be stored here: ${storePath}/tokens.${userTokens.userId}.json`,
+        )
       }
       break
     default:
