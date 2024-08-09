@@ -1,15 +1,15 @@
 import "jsr:@std/dotenv/load"
-import { RefreshingAuthProviderFilesystemStore } from "./mod.ts"
-import type { UserTokensResponse } from "./auth/user_tokens_response.ts"
-import type { UserTokenValidationResponse } from "./auth/user_token_validation_response.ts"
+import { RefreshingAuthProviderFilesystemStore } from "./auth/refreshing_auth_provider_filesystem_store.ts"
+import type { UserTokensResponseData } from "./auth/user_tokens_response_data.ts"
+import type { UserAccessTokenValidationResponseData } from "./auth/user_access_token_validation_response_data.ts"
+import { RefreshingAuthProvider } from "./auth/refreshing_auth_provider.ts"
 
 // Get Env Variables
 const port = parseInt(Deno.env.get("GETTOKENS_HTTP_SERVER_PORT") ?? "8080")
-const twitchClientId = Deno.env.get("TWITCH_CLIENT_ID")
-const twitchClientSecret = Deno.env.get("TWITCH_CLIENT_SECRET")
+const twitchClientId = Deno.env.get("TWITCH_CLIENT_ID") ?? ""
+const twitchClientSecret = Deno.env.get("TWITCH_CLIENT_SECRET") ?? ""
 
 // Set constants
-const twitchGrantType = "authorization_code"
 const twitchRedirectURI = `http://localhost:${port}`
 const twitchResponseType = "code"
 const twitchScopes = [
@@ -26,6 +26,13 @@ const store = new RefreshingAuthProviderFilesystemStore({
   storePath: "./twitch/examples/default/data",
 })
 
+const authProvider = new RefreshingAuthProvider({
+  clientId: twitchClientId,
+  clientSecret: twitchClientSecret,
+  store,
+  redirectURI: twitchRedirectURI,
+})
+
 async function handler(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const requestPath = url.pathname
@@ -39,31 +46,11 @@ async function handler(request: Request): Promise<Response> {
             twitchScopes.join("+")
           }">Click to get bot tokens</a>`
       } else {
-        const exchangeUrl =
-          `https://id.twitch.tv/oauth2/token?client_id=${twitchClientId}&client_secret=${twitchClientSecret}&code=${twitchCode}&grant_type=${twitchGrantType}&redirect_uri=${twitchRedirectURI}`
-        const codeExchangeResponse = await fetch(exchangeUrl, { method: "post" })
-        const userTokensResponse = await codeExchangeResponse.json() as UserTokensResponse
-        // Validate to get user id
-        const validateResponse = await fetch(`https://id.twitch.tv/oauth2/validate`, {
-          headers: {
-            Authorization: `OAuth ${userTokensResponse.access_token}`,
-          },
-          method: "get",
-        })
-        const userTokenValidation = await validateResponse.json() as UserTokenValidationResponse
-        // build user tokens
-        const userTokens = {
-          accessToken: userTokensResponse.access_token,
-          expiresIn: userTokensResponse.expires_in,
-          refreshToken: userTokensResponse.refresh_token,
-          scope: userTokensResponse.scope,
-          tokenType: userTokensResponse.token_type,
-          userId: userTokenValidation.user_id,
-          createdAt: Date.now(),
-        }
-
-        store.saveTokensByUserId(userTokenValidation.user_id, userTokens)
-        body = JSON.stringify({ userTokensResponse, userTokenValidation }, undefined, 2)
+        const userTokens = await authProvider.exchangeCodeForUserTokens(twitchCode)
+        body = JSON.stringify({ userTokens }, undefined, 2)
+        setTimeout(() => {
+          Deno.exit()
+        }, 10000)
       }
       break
     default:
