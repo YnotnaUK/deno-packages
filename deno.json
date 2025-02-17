@@ -1,4 +1,8 @@
 {
+  "fmt": {
+    "lineWidth": 120,
+    "semiColons": false
+  },
   "workspace": {
     "members": [
       "./packages/twitch"
