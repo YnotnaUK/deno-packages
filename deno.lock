@@ -2,6 +2,7 @@
   "version": "4",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.11",
+    "jsr:@std/dotenv@~0.225.3": "0.225.3",
     "jsr:@std/internal@^1.0.5": "1.0.5"
   },
   "jsr": {
@@ -11,6 +12,9 @@
         "jsr:@std/internal"
       ]
     },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
     }
@@ -19,7 +23,8 @@
     "members": {
       "packages/twitch": {
         "dependencies": [
-          "jsr:@std/assert@1"
+          "jsr:@std/assert@1",
+          "jsr:@std/dotenv@~0.225.3"
         ]
       }
     }
