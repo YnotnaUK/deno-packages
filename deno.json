@@ -4,7 +4,7 @@
     "semiColons": false
   },
   "tasks": {
-    "twitch:tokengen": "deno -A ./packages/twitch/token_generator.ts"
+    "twitch:tokengen": "deno task --filter twitch tokengen"
   },
   "workspace": {
     "members": [

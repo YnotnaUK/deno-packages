@@ -4,7 +4,7 @@
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno test --watch",
-    "tokengen": "deno -A token_generator.ts"
+    "tokengen": "deno -A ./examples/token_generator/main.ts"
   },
   "license": "MIT",
   "imports": {
