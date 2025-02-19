@@ -1,4 +1,9 @@
-import "jsr:@std/dotenv/load"
+import { load } from "jsr:@std/dotenv"
+
+await load({
+  envPath: `${import.meta.dirname}/.env`,
+  export: true,
+})
 
 const twitchClientId: string | undefined = Deno.env.get("TWITCH_CLIENT_ID")
 const twitchClientSecret: string | undefined = Deno.env.get("TWITCH_CLIENT_SECRET")
