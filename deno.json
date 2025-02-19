@@ -3,6 +3,9 @@
     "lineWidth": 120,
     "semiColons": false
   },
+  "tasks": {
+    "twitch:tokengen": "deno -A ./packages/twitch/token_generator.ts"
+  },
   "workspace": {
     "members": [
       "./packages/twitch"
