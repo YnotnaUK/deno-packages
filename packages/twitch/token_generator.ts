@@ -1,56 +1,42 @@
-import { load as loadEnvVariables } from "jsr:@std/dotenv"
-
-type envVariables = {
+export type TwitchTokenGeneratorConfig = {
+  httpServerHostname: string
   httpServerPort: number
   twitchClientId: string
   twitchClientSecret: string
 }
 
-const processEnvVariables = async (): Promise<envVariables> => {
-  // Load env variables
-  await loadEnvVariables({
-    envPath: `${import.meta.dirname}/.env`,
-    export: true,
-  })
-  // Get variables from enviroment
-  const httpServerPort: number = parseInt(Deno.env.get("HTTP_SERVER_PORT") ?? "")
-  const twitchClientId: string | undefined = Deno.env.get("TWITCH_CLIENT_ID")
-  const twitchClientSecret: string | undefined = Deno.env.get("TWITCH_CLIENT_SECRET")
-  // Validation
-  if (!httpServerPort) {
-    throw new Error(`HTTP_SERVER_PORT is not set`)
+export class TwitchTokenGenerator {
+  private readonly httpServerHostname: string
+  private readonly httpServerPort: number
+  private readonly twitchClientId: string
+  private readonly twitchClientSecret: string
+
+  constructor(config: TwitchTokenGeneratorConfig) {
+    this.httpServerHostname = config.httpServerHostname
+    this.httpServerPort = config.httpServerPort
+    this.twitchClientId = config.twitchClientId
+    this.twitchClientSecret = config.twitchClientSecret
   }
-  const minHttpServerPort: number = 1000
-  const maxHttpServerPort: number = 9000
-  if (httpServerPort < minHttpServerPort || httpServerPort > maxHttpServerPort) {
-    throw new Error(
-      `HTTP_SERVER_PORT is not within a valid range (${minHttpServerPort} to ${maxHttpServerPort}): ${httpServerPort}`,
-    )
+
+  handler = (_request: Request) => {
+    return new Response("Hello, world")
   }
-  if (!twitchClientId) {
-    throw new Error(`TWITCH_CLIENT_ID is not set`)
+
+  onListen = ({ port, hostname }: { port: number; hostname: string }) => {
+    console.log(`Server started at http://${hostname}:${port}`)
   }
-  if (!twitchClientSecret) {
-    throw new Error("TWITCH_CLIENT_SECRET is not set")
+
+  start = () => {
+    console.log("Starting twitch token generator...")
+    this.startHttpServer()
   }
-  // All ok, return them
-  return {
-    httpServerPort,
-    twitchClientId,
-    twitchClientSecret,
+
+  startHttpServer = () => {
+    Deno.serve({
+      port: this.httpServerPort,
+      hostname: this.httpServerHostname,
+      handler: this.handler,
+      onListen: this.onListen,
+    })
   }
 }
-
-const config: envVariables = await processEnvVariables()
-
-const _httpServer = Deno.serve({
-  port: config.httpServerPort,
-  hostname: "0.0.0.0",
-  handler: (request: Request) => {
-    console.log(request)
-    return new Response("Hello, world")
-  },
-  onListen({ port, hostname }) {
-    console.log(`Server started at http://${hostname}:${port}`)
-  },
-})
