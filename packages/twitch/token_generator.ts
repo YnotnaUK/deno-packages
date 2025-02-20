@@ -18,7 +18,7 @@ export class TwitchTokenGenerator {
     this.twitchClientSecret = config.twitchClientSecret
   }
 
-  handler = (_request: Request) => {
+  handler = (_request: Request): Response => {
     return new Response("Hello, world")
   }
 
