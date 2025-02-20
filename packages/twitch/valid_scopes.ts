@@ -1,4 +1,4 @@
-export const allowedScopes: string[] = [
+export const validScopes: string[] = [
   "analytics:read:extensions",
   "analytics:read:games",
   "bits:read",
