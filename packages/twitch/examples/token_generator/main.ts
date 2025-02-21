@@ -1,5 +1,5 @@
-import { load as loadEnvVariables } from "jsr:@std/dotenv"
-import { TwitchTokenGenerator } from "../../token_generator.ts"
+import { load as loadEnvVariables } from "@std/dotenv"
+import { TwitchTokenGenerator } from "../../mod.ts"
 
 const prepareEnvVariables = async () => {
   // Load from file
