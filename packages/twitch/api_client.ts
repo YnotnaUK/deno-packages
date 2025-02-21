@@ -1,3 +1,4 @@
+import type { AccessTokenExternal } from "./types/external_access_token.ts"
 import { validScopes } from "./valid_scopes.ts"
 
 type GenerateLoginURLProperties = {
@@ -7,16 +8,55 @@ type GenerateLoginURLProperties = {
   state?: string
 }
 
+type ExchangeAuthorisationCodeProperties = {
+  code: string
+  redirectUri: string
+}
+
 export type TwitchAPIClientConfig = {
   twitchClientId: string
+  twitchClientSecret?: string | undefined
 }
 
 export class TwitchAPIClient {
-  private readonly twitchClientId: string
   private readonly endpointOauth2Authorise: string = "https://id.twitch.tv/oauth2/authorize"
+  private readonly endpointOauth2Token: string = "https://id.twitch.tv/oauth2/token"
+  private readonly twitchClientId: string
+  private readonly twitchClientSecret: string | undefined
+  private readonly httpUserAgentName: string = "YnotnaNetwork/v1.0"
 
   constructor(config: TwitchAPIClientConfig) {
     this.twitchClientId = config.twitchClientId
+    this.twitchClientSecret = config.twitchClientSecret
+  }
+
+  exchangeAuthorisationCode = async (props: ExchangeAuthorisationCodeProperties): Promise<AccessTokenExternal> => {
+    if (!this.twitchClientSecret) {
+      throw new Error(`exchangeAuthorisationCode: cannot use method twitchClientSecret is not set`)
+    }
+    const urlSearchParams = new URLSearchParams()
+    urlSearchParams.append("client_id", this.twitchClientId)
+    urlSearchParams.append("client_secret", this.twitchClientSecret)
+    urlSearchParams.append("code", props.code)
+    urlSearchParams.append("grant_type", "authorization_code")
+    urlSearchParams.append("redirect_uri", props.redirectUri)
+    console.log()
+    const httpClientBody: string = urlSearchParams.toString()
+    const httpClientHeaders = {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": this.httpUserAgentName,
+    }
+    const httpResponse = await fetch(this.endpointOauth2Token, {
+      body: httpClientBody,
+      headers: httpClientHeaders,
+      method: "POST",
+    })
+    switch (httpResponse.status) {
+      case 200:
+        return await httpResponse.json() as AccessTokenExternal
+      default:
+        throw new Error(`exchangeAuthorisationCode: invalid reponse from api`)
+    }
   }
 
   generateLoginUrl = (props: GenerateLoginURLProperties) => {
@@ -29,9 +69,6 @@ export class TwitchAPIClient {
     }
     if (props.forceVerify !== "true" && props.forceVerify !== "false") {
       throw TypeError(`generateLoginUrl: forceVerify is invalid: ${props.forceVerify}`)
-    }
-    if (!props.redirectUri) {
-      throw new TypeError(`generateLoginUrl: redirectUri is invalid: ${props.redirectUri}`)
     }
     if (!props.scopes) {
       props.scopes = []
