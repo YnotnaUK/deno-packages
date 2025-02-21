@@ -12,6 +12,7 @@ const prepareEnvVariables = async () => {
   const httpServerPort = parseInt(Deno.env.get("HTTP_SERVER_PORT") ?? "")
   const twitchClientId = Deno.env.get("TWITCH_CLIENT_ID")
   const twitchClientSecret = Deno.env.get("TWITCH_CLIENT_SECRET")
+  const twitchRedirectUri = Deno.env.get("TWITCH_REDIRECT_URI")
   // Validate
   if (!httpServerHostname) {
     throw new Error(`HTTP_SERVER_HOSTNAME not set`)
@@ -25,12 +26,16 @@ const prepareEnvVariables = async () => {
   if (!twitchClientSecret) {
     throw new Error(`TWITCH_CLIENT_SECRET not set`)
   }
+  if (!twitchRedirectUri) {
+    throw new Error(`TWITCH_REDIRECT_URI not set`)
+  }
   // Return results
   return {
     httpServerHostname,
     httpServerPort,
     twitchClientId,
     twitchClientSecret,
+    twitchRedirectUri,
   }
 }
 
@@ -43,6 +48,7 @@ const tokenGenerator = new TwitchTokenGenerator({
   httpServerPort: config.httpServerPort,
   twitchClientId: config.twitchClientId,
   twitchClientSecret: config.twitchClientSecret,
+  twitchRedirectUri: config.twitchRedirectUri,
 })
 
 // Start generator
