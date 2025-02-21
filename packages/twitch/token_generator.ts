@@ -6,30 +6,30 @@ export type TwitchTokenGeneratorConfig = {
   httpServerPort: number
   twitchClientId: string
   twitchClientSecret: string
+  twitchRedirectUri: string
 }
 
 export class TwitchTokenGenerator {
   private readonly apiClient: TwitchAPIClient
   private readonly httpServerHostname: string
   private readonly httpServerPort: number
-  private readonly twitchClientId: string
-  private readonly twitchClientSecret: string
+  private readonly twitchRedirectUri: string
 
   constructor(config: TwitchTokenGeneratorConfig) {
     this.apiClient = new TwitchAPIClient({
       twitchClientId: config.twitchClientId,
+      twitchClientSecret: config.twitchClientSecret,
     })
     this.httpServerHostname = config.httpServerHostname
     this.httpServerPort = config.httpServerPort
-    this.twitchClientId = config.twitchClientId
-    this.twitchClientSecret = config.twitchClientSecret
+    this.twitchRedirectUri = config.twitchRedirectUri
   }
 
-  handler = (request: Request): Response => {
+  handler = async (request: Request): Promise<Response> => {
     const url = new URL(request.url)
     if (url.pathname === "/") {
       const loginUrl: string = this.apiClient.generateLoginUrl({
-        redirectUri: `https://${url.hostname}/account/login/twitch/callback`,
+        redirectUri: `https://${url.hostname}${this.twitchRedirectUri}`,
         scopes: validScopes,
       })
       return new Response(`<h3>Twitch Token Generator</h3><p><a href="${loginUrl}">Login with Twitch</a></p>`, {
@@ -38,11 +38,24 @@ export class TwitchTokenGenerator {
           "content-type": "text/html; charset=utf-8",
         },
       })
-    } else if (url.pathname === "/account/login/twitch/callback") {
-      return new Response(`<h3>Code Exchange?</h3><p>${url.searchParams.get("code")}</p>`, {
+    } else if (url.pathname === this.twitchRedirectUri) {
+      const code = url.searchParams.get("code")
+      if (!code) {
+        return new Response(`<h3>Code Exchange Failed</h3><p>code was not returned</p>`, {
+          status: 400,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+          },
+        })
+      }
+      const externalAccessToken = await this.apiClient.exchangeAuthorisationCode({
+        code: code,
+        redirectUri: `https://${url.hostname}${this.twitchRedirectUri}`,
+      })
+      return new Response(JSON.stringify(externalAccessToken), {
         status: 200,
         headers: {
-          "content-type": "text/html; charset=utf-8",
+          "content-type": "application/json; charset=utf-8",
         },
       })
     } else {
