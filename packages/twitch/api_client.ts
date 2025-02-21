@@ -1,0 +1,74 @@
+import { validScopes } from "./valid_scopes.ts"
+
+type GenerateLoginURLProperties = {
+  forceVerify?: "true" | "false" | boolean
+  redirectUri: string
+  scopes?: string[]
+  state?: string
+}
+
+export type TwitchAPIClientConfig = {
+  twitchClientId: string
+}
+
+export class TwitchAPIClient {
+  private readonly twitchClientId: string
+  private readonly endpointOauth2Authorise: string = "https://id.twitch.tv/oauth2/authorize"
+
+  constructor(config: TwitchAPIClientConfig) {
+    this.twitchClientId = config.twitchClientId
+  }
+
+  generateLoginUrl = (props: GenerateLoginURLProperties) => {
+    // Validate
+    if (typeof props.forceVerify === "undefined") {
+      props.forceVerify = "false"
+    }
+    if (typeof props.forceVerify === "boolean") {
+      props.forceVerify = props.forceVerify === true ? "true" : "false"
+    }
+    if (props.forceVerify !== "true" && props.forceVerify !== "false") {
+      throw TypeError(`generateLoginUrl: forceVerify is invalid: ${props.forceVerify}`)
+    }
+    if (!props.redirectUri) {
+      throw new TypeError(`generateLoginUrl: redirectUri is invalid: ${props.redirectUri}`)
+    }
+    if (!props.scopes) {
+      props.scopes = []
+    }
+    // Check scopes and create a string of them
+    let scopesString: string = ""
+    for (let scopeIndex = 0; scopeIndex < props.scopes.length; scopeIndex++) {
+      const scope = props.scopes[scopeIndex]
+      // Ensure scope is of type string
+      if (typeof scope !== "string") {
+        throw new TypeError(`generateLoginUrl: scopes[${scopeIndex}] is invalid: ${scope}`)
+      }
+      // Ensure scope is valid
+      this.isValidScope(scope)
+      // Build up scope string based on current index
+      if (scopeIndex === 0) {
+        scopesString = `${scope}`
+      } else {
+        scopesString = `${scopesString}+${scope}`
+      }
+    }
+    // Build url search parameters
+    const urlSearchParams = new URLSearchParams()
+    urlSearchParams.append("client_id", this.twitchClientId)
+    urlSearchParams.append("force_verify", props.forceVerify)
+    urlSearchParams.append("redirect_uri", props.redirectUri)
+    urlSearchParams.append("response_type", "code")
+    urlSearchParams.append("scope", scopesString)
+    // if state exists and is greater than 1 character add it
+    if (props.state && props.state.length > 0) {
+      urlSearchParams.append("state", props.state)
+    }
+    // Twitch does not like + being encoded so we convert it back here
+    return `${this.endpointOauth2Authorise}?${urlSearchParams.toString().replaceAll("%2B", "+")}`
+  }
+
+  isValidScope = (scope: string): boolean => {
+    return validScopes.includes(scope)
+  }
+}
